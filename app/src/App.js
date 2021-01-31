@@ -1,7 +1,8 @@
 import './App.css';
-import LoginButton from "./Button"
 import React, {Component} from "react";
+import SpotifyWebApi from 'spotify-web-api-js';
 
+const spotifyWebApi = new SpotifyWebApi(); 
 
 
 class App extends Component{
@@ -15,6 +16,12 @@ class App extends Component{
        },
        loggiedIn : params.access_token ? true : false 
     }
+
+    if (params.access_token){
+      console.log(params.access_token)
+      spotifyWebApi.setAccessToken("BQB1RqmdtB-pglm6ZIou6KM_l50FnKSdFaBxDpHtkbhtP8eCTWRujL-BBwrMnLLAa6dxgQhWxsP1BTLus4vbTy0ffXXRQeTf7tYJHR_iRemixLpbBHv3a9oeaVl66tta-aW-f1ilv_EeCg4nkysbcrhxehdVQHOtoMZ2MpxWw1dMJckxm7xnDDS_xvs")
+    }
+
   }
 
 
@@ -28,6 +35,18 @@ class App extends Component{
     return hashParams;
   }
 
+  getNowPlaying(){
+    spotifyWebApi.getMyCurrentPlayingTrack().then((response) => {
+          console.log(response)
+          // this.setState({
+          //   nowPlaying:{
+          //     name: response.item.name,
+          //     image : response.item.album.images[0].url
+          //   }
+          // })
+      })
+  }
+
 
   render(){
     return(
@@ -35,29 +54,47 @@ class App extends Component{
         <h1>
           Personal Spotify Stats 
         </h1>
+        <div className ="ButtonContainer">
+          {this.state.loggiedIn 
+            ? null
+            : <LoginButton/>
+          }
+          <button onClick={this.getNowPlaying} className="ButtonSize">What song is playing right now?</button>
+        </div>
+       
 
-        {this.state.loggiedIn 
-          ? null
-          : <LoginButton/>
-        }
+
+
+
+
         
-        {this.state.loggiedIn && <CurrentSong name={this.state.nowPlaying.name}  image={this.state.nowPlaying.image}/>}
       </div>
     );
   }
 }
 
+// class CurrentSong extends Component {
+//   render(){
+//     return(
+//       <div>
+//           <h1>Now Playing: {this.props.name}</h1>
+//           <div>
+//             <img src = {this.props.image} style={{width: 100}}/>
+//           </div>
+//       </div>
+//     );
+//   }
+// }
 
-class CurrentSong extends Component {
+class LoginButton extends Component{
   render(){
-    return(
-      <div>
-          <h1>Now Playing: {this.props.name}</h1>
-          <div>
-            <img src = {this.props.image} style={{width: 100}}/>
+      return(
+          <div className ="ButtonContainer">
+            <a href='http://localhost:8888'>
+                <button className="ButtonSize">Login With Spotify</button>
+            </a>
           </div>
-      </div>
-    );
+      );
   }
 }
 
