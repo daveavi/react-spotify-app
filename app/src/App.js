@@ -14,6 +14,8 @@ class App extends Component{
          name: "",
          image: ''
        },
+       clickedNowPlaying: false,
+       clickedTopArtist: false,
        topArtist: {
          name: "",
          image : ''
@@ -47,13 +49,40 @@ class App extends Component{
   getNowPlaying(){
     spotifyWebApi.getMyCurrentPlayingTrack().then((response) => {
           console.log(response)
-          this.setState({
-            nowPlaying:{
-              name: response.item.name,
-              image : response.item.album.images[0].url
-            }
-          })
-      })
+          if(response != "") {
+              this.setState({
+                nowPlaying:{
+                  name: response.item.name,
+                  image : response.item.album.images[0].url,
+                },
+                clickedNowPlaying: true,
+                clickedTopArtist: false
+              })
+          }else{
+            this.getRecentPlayedSong()
+          }
+      },function(err) {
+        console.log('Something went wrong!', err);
+      });
+  }
+
+  getRecentPlayedSong(){
+    spotifyWebApi.getMyRecentlyPlayedTracks({
+      limit : 20
+    }).then((response) => {
+        let lastPlayedSong = response.items[0]
+        this.setState({
+          nowPlaying:{
+            name: lastPlayedSong.track.name,
+            image : lastPlayedSong.track.album.images[0].url,
+          },
+          clickedNowPlaying: true,
+          clickedTopArtist: false
+        })
+    }, function(err) {
+      console.log('Something went wrong!', err);
+    });
+    
   }
 
 
@@ -63,10 +92,13 @@ class App extends Component{
         this.setState({
           topArtist:{
             name: currentTopArtist.name,
-            image : currentTopArtist.images[0]
-          }
+            image : currentTopArtist.images[0].url
+          }, 
+          clickedTopArtist: true,
+          clickedNowPlaying: false
         })
-        console.log(this.state.topArtist)
+    }, function(err) {
+      console.log('Something went wrong!', err);
     })
   }
 
@@ -83,8 +115,12 @@ class App extends Component{
             : <LoginButton/>
           }
         </div>
-          {this.state.nowPlaying.name
-            ? <CurrentSong name={this.state.nowPlaying.name} image = {this.state.nowPlaying.image}/>
+          {this.state.clickedNowPlaying
+            ? <LastSong name={this.state.nowPlaying.name} image = {this.state.nowPlaying.image}/>
+            : null
+          } 
+          {this.state.clickedTopArtist
+            ? <CurrentTopArtist name={this.state.topArtist.name} image = {this.state.topArtist.image}/>
             : null
           } 
     
@@ -98,11 +134,24 @@ class App extends Component{
   }
 }
 
-class CurrentSong extends Component {
+class LastSong extends Component {
   render(){
     return(
       <div>
-          <h1>Now Playing: {this.props.name}</h1>
+          <h1>Recent Song Played: {this.props.name}</h1>
+          <div>
+            <img src = {this.props.image} style={{width: 100}}/>
+          </div>
+      </div>
+    );
+  }
+}
+
+class CurrentTopArtist extends Component {
+  render(){
+    return(
+      <div>
+          <h1>Top Artist You Have Played: {this.props.name}</h1>
           <div>
             <img src = {this.props.image} style={{width: 100}}/>
           </div>
