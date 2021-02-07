@@ -11,10 +11,14 @@ class App extends Component{
     const params = this.getHashParams()
     this.state = {
        nowPlaying: {
-         gotName : false, 
          name: "",
-         image: '',
+         image: ''
        },
+       topArtist: {
+         name: "",
+         image : ''
+       },
+
        loggiedIn : params.access_token ? true : false 
     }
 
@@ -24,6 +28,7 @@ class App extends Component{
     }
 
     this.getNowPlaying = this.getNowPlaying.bind(this)
+    this.getTopArtist = this.getTopArtist.bind(this)
 
 
   }
@@ -52,6 +57,20 @@ class App extends Component{
   }
 
 
+  getTopArtist(){
+    spotifyWebApi.getMyTopArtists().then((response) => {
+        let currentTopArtist = response.items[0]
+        this.setState({
+          topArtist:{
+            name: currentTopArtist.name,
+            image : currentTopArtist.images[0]
+          }
+        })
+        console.log(this.state.topArtist)
+    })
+  }
+
+
   render(){
     return(
       <div className="App">
@@ -60,7 +79,7 @@ class App extends Component{
         </h1>
         <div className ="ButtonContainer">
           {this.state.loggiedIn 
-            ? <button onClick={this.getNowPlaying} className="ButtonSize">What song is playing right now?</button>
+            ? <AskStats getNowPlaying={this.getNowPlaying} getTopArtist={this.getTopArtist} />
             : <LoginButton/>
           }
         </div>
@@ -68,7 +87,7 @@ class App extends Component{
             ? <CurrentSong name={this.state.nowPlaying.name} image = {this.state.nowPlaying.image}/>
             : null
           } 
-
+    
 
 
 
@@ -92,6 +111,8 @@ class CurrentSong extends Component {
   }
 }
 
+
+
 class LoginButton extends Component{
   render(){
       return(
@@ -101,6 +122,23 @@ class LoginButton extends Component{
             </a>
           </div>
       );
+  }
+}
+
+
+class AskStats extends Component{
+  render(){
+      return(
+        <div>
+          <button onClick={this.props.getNowPlaying} className="ButtonSize">What song is playing right now?</button> 
+          <br></br> <br></br>
+          <button onClick={this.props.getTopArtist} className="ButtonSize">Who are my top played artists right now?</button>
+        </div>
+
+      );
+
+
+
   }
 }
 
