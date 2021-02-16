@@ -1,0 +1,19 @@
+version : '3.0'
+services:
+  nginx:
+    image: nginx:latest
+    container_name: tidal-proxy 
+    depends_on:
+      - tidal-java
+    volumes:
+      - ./proxy/nginx.config:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+  
+  tidal-java:
+      image: tidal-java
+      container_name: tidal-java
+      build:
+          context: ./java_service 
+      ports:
+        - "80"
